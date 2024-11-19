@@ -1,0 +1,6 @@
+Backtesting @ git+https://github.com/IperGiove/backtesting.py.git@d7f6046bafe486d3d5a6f63a6bb0f731940caa8b
+gymnasium==0.29.0
+stable-baselines3==2.0.0
+pandas==1.5.3
+numpy==1.23.0
+yfinance==0.2.49
