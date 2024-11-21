@@ -1,29 +1,33 @@
 import pandas as pd
 import numpy as np
 import yfinance as yf
+import streamlit as st
+import matplotlib.pyplot as plt
 from backtesting import Backtest, Strategy
 from gymnasium import spaces, Env
 from stable_baselines3 import PPO, DQN
-
-# TODO DDPG
+import os
+import shutil
+import webbrowser
 
 # Define the custom strategy
 class periodicStrategy(Strategy):
     def init(self):
         print(f"Start with equity={self.equity:.2f}")
-        
-    def next(self, action:int|None=None):
+
+    def next(self, action: int | None = None):
         print(f"Action={action} Equity={self.equity:.2f} Date={self.data.index[-1]}")
         if action:
             if action == 1:
                 self.buy()
             elif action == 2:
                 self.position.close()
-            
+
     def observation(self):
         closes = self.data.Close[-20:]
         closes = (closes - closes.min()) / (closes.max() - closes.min())
         return [closes]
+
 
 # Define the custom environment
 class CustomEnv(Env):
@@ -73,31 +77,67 @@ class CustomEnv(Env):
     def close(self):
         pass
 
+# Get stock data from Yahoo Finance
 def get_stock_data(ticker, period="1y"):
     stock = yf.Ticker(ticker)
     df = stock.history(period=period)
     df = df[['Open', 'High', 'Low', 'Close', 'Volume']].dropna()
     return df
 
-# Fetch real data for Apple (AAPL) from Yahoo Finance
-stock_data = get_stock_data("AAPL")
-print(stock_data.head())  # Check the first few rows
 
-# Instantiate the backtest with the fetched real data
+# Streamlit frontend
+st.title('Stock Trading with Reinforcement Learning')
+
+# User inputs
+ticker = st.text_input("Enter Stock Ticker", "AAPL")
+period = st.selectbox("Select Time Period", ["1y", "3y", "5y"])
+training_timesteps = st.number_input("Training Timesteps", min_value=100, max_value=10000, step=1000, value=1000)
+
+# Fetch the stock data
+st.subheader("Stock Data")
+stock_data = get_stock_data(ticker, period)
+
+# Show stock data in a table
+col1, col2 = st.columns([3, 1])
+with col1:
+    st.write(stock_data.head())
+
+# Plot stock data graph
+with col2:
+    st.subheader("Stock Data Plot")
+    fig, ax = plt.subplots(figsize=(10, 5))  # Landscape mode
+    ax.plot(stock_data.index, stock_data['Close'], label='Close Price', color='blue')
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Price")
+    ax.set_title(f"{ticker} Stock Price")
+    ax.legend(loc='best')
+    st.pyplot(fig)
+
+
+# Set up the backtest
 bt = Backtest(stock_data, periodicStrategy, cash=10000)
 
-# Instantiate the custom environment with the backtest
+# Set up the environment
 env = CustomEnv(bt)
 
-# Train PPO agent (you can replace PPO with DDPG or DQN as shown earlier)
-ppo_model = PPO("MlpPolicy", env, verbose=0, tensorboard_log="./logs_ppo/")
-ppo_model.learn(total_timesteps=1000, log_interval=1)
+# Training the RL agent (PPO or DQN)
+train_button = st.button("Train PPO Agent")
 
-# # # Alternatively, use DQN
-# dqn_model = DQN("MlpPolicy", env, verbose=0, tensorboard_log="./logs_dqn/")
-# dqn_model.learn(total_timesteps=10000, log_interval=1)
+if train_button:
+    with st.spinner("Training the model..."):
+        # Train PPO agent
+        # ppo_model = PPO("MlpPolicy", env, verbose=0, tensorboard_log="./logs_ppo/")
+        # ppo_model.learn(total_timesteps=training_timesteps, log_interval=1)
 
-# Optionally save any of the models
-# ppo_model.save("ppo_stock_trader")
-# ddpg_model.save("ddpg_stock_trader")
-# dqn_model.save("dqn_stock_trader")
+        dqn_model = DQN("MlpPolicy", env, verbose=0, tensorboard_log="./logs_dqn/")
+        dqn_model.learn(total_timesteps=10000, log_interval=1)
+        
+        bt = Backtest(stock_data, periodicStrategy, cash=10000)
+        # Run the backtest
+        result = bt.run()
+        st.success("Backtest completed!")
+
+        # Plot the backtest results and show it
+        bt.plot(open_browser=True)
+
+        st.success(f"Training completed with {training_timesteps} timesteps!")
