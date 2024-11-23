@@ -4,27 +4,53 @@ import torch
 from env import TradingEnv  # Your custom environment
 from dqn import DQNAgent
 from ddpg import DDPGAgent
-from ppo import PPOAgent
 from a2c import A2CAgent
 from yfinance import download as yf_download
 
+# def train_model(agent, env, num_episodes=500, max_steps=200):
+#     """
+#     Train the agent in the given environment.
+#     """
+#     rewards_history = []
+#     for episode in range(num_episodes):
+#         state = env.reset()
+#         total_reward = 0
+#         for step in range(max_steps):
+#             action = agent.act(state)
+#             next_state, reward, done, _ = env.step(action)
+#             agent.store_transition(state, action, reward, next_state, done)
+#             agent.train()
+#             state = next_state
+#             total_reward += reward
+#             if done:
+#                 break
+#         rewards_history.append(total_reward)
+#         print(f"Episode {episode + 1}/{num_episodes}, Total Reward: {total_reward}")
+#     return rewards_history
+
 def train_model(agent, env, num_episodes=500, max_steps=200):
     """
+    A2c
     Train the agent in the given environment.
     """
     rewards_history = []
     for episode in range(num_episodes):
         state = env.reset()
         total_reward = 0
+        states, actions, rewards, next_states, dones = [], [], [], [], []
         for step in range(max_steps):
             action = agent.act(state)
             next_state, reward, done, _ = env.step(action)
-            agent.store_transition(state, action, reward, next_state, done)
-            agent.train()
+            states.append(state)
+            actions.append(action)
+            rewards.append(reward)
+            next_states.append(next_state)
+            dones.append(done)
             state = next_state
             total_reward += reward
             if done:
                 break
+        agent.train(states, actions, rewards, next_states, dones)
         rewards_history.append(total_reward)
         print(f"Episode {episode + 1}/{num_episodes}, Total Reward: {total_reward}")
     return rewards_history
@@ -68,10 +94,8 @@ def main(args):
         agent = DQNAgent(state_dim, action_dim, epsilon=args.epsilon)
     elif args.model == "ddpg":
         agent = DDPGAgent(state_dim, action_dim, action_bounds=1.0)
-    elif args.model == "ppo":
-        agent = PPOAgent(state_dim, action_dim)
     elif args.model == "a2c":
-        agent = A2CAgent(state_dim, action_dim)
+        agent = A2CAgent(state_dim, action_dim, continuous=not args.discrete)
     else:
         raise ValueError(f"Invalid model type: {args.model}")
 
