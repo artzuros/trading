@@ -1,3 +1,6 @@
 *.csv
 *.npy
 *.pt
+*.pth
+*.pyc
+*.html
