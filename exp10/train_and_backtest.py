@@ -7,53 +7,46 @@ from ddpg import DDPGAgent
 from a2c import A2CAgent
 from yfinance import download as yf_download
 
-# def train_model(agent, env, num_episodes=500, max_steps=200):
-#     """
-#     Train the agent in the given environment.
-#     """
-#     rewards_history = []
-#     for episode in range(num_episodes):
-#         state = env.reset()
-#         total_reward = 0
-#         for step in range(max_steps):
-#             action = agent.act(state)
-#             next_state, reward, done, _ = env.step(action)
-#             agent.store_transition(state, action, reward, next_state, done)
-#             agent.train()
-#             state = next_state
-#             total_reward += reward
-#             if done:
-#                 break
-#         rewards_history.append(total_reward)
-#         print(f"Episode {episode + 1}/{num_episodes}, Total Reward: {total_reward}")
-#     return rewards_history
-
-def train_model(agent, env, num_episodes=500, max_steps=200):
-    """
-    A2c
-    Train the agent in the given environment.
-    """
-    rewards_history = []
-    for episode in range(num_episodes):
-        state = env.reset()
-        total_reward = 0
-        states, actions, rewards, next_states, dones = [], [], [], [], []
-        for step in range(max_steps):
-            action = agent.act(state)
-            next_state, reward, done, _ = env.step(action)
-            states.append(state)
-            actions.append(action)
-            rewards.append(reward)
-            next_states.append(next_state)
-            dones.append(done)
-            state = next_state
-            total_reward += reward
-            if done:
-                break
-        agent.train(states, actions, rewards, next_states, dones)
-        rewards_history.append(total_reward)
-        print(f"Episode {episode + 1}/{num_episodes}, Total Reward: {total_reward}")
-    return rewards_history
+def train_model(args, agent, env, num_episodes=500, max_steps=200):
+    if args.model == "a2c":
+        rewards_history = []
+        for episode in range(num_episodes):
+            state = env.reset()
+            total_reward = 0
+            states, actions, rewards, next_states, dones = [], [], [], [], []
+            for step in range(max_steps):
+                action = agent.act(state)
+                next_state, reward, done, _ = env.step(action)
+                states.append(state)
+                actions.append(action)
+                rewards.append(reward)
+                next_states.append(next_state)
+                dones.append(done)
+                state = next_state
+                total_reward += reward
+                if done:
+                    break
+            agent.train(states, actions, rewards, next_states, dones)
+            rewards_history.append(total_reward)
+            print(f"Episode {episode + 1}/{num_episodes}, Total Reward: {total_reward}")
+        return rewards_history
+    else:
+        rewards_history = []
+        for episode in range(num_episodes):
+            state = env.reset()
+            total_reward = 0
+            for step in range(max_steps):
+                action = agent.act(state)
+                next_state, reward, done, _ = env.step(action)
+                agent.store_transition(state, action, reward, next_state, done)
+                agent.train()
+                state = next_state
+                total_reward += reward
+                if done:
+                    break
+            rewards_history.append(total_reward)
+            print(f"Episode {episode + 1}/{num_episodes}, Total Reward: {total_reward}")
+        return rewards_history
 
 
 def backtest(agent, env, max_steps=200):
@@ -101,7 +94,7 @@ def main(args):
 
     # Train the agent
     print(f"Training {args.model.upper()}...")
-    train_rewards = train_model(agent, env, num_episodes=args.episodes)
+    train_rewards = train_model(args, agent, env, num_episodes=args.episodes)
 
     # Backtest the agent
     print(f"Backtesting {args.model.upper()}...")
