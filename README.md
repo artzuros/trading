@@ -1,6 +1,10 @@
 # Reinforcement Learning-based Stock Trading Simulator
 This project provides an implementation of a Reinforcement Learning (RL) based stock trading simulator. The simulator uses RL algorithms like DQN (Deep Q-Network), DDPG (Deep Deterministic Policy Gradient), and A2C (Advantage Actor-Critic) to train agents that can trade stocks based on historical data. The simulator allows backtesting of trained agents in a realistic environment to evaluate their performance.
 
+### Streamlit Testing
+
+![alt text](media/streamlitpoc.gif)
+
 #### Table of Contents
 - Overview
 - Installation
