@@ -55,8 +55,10 @@ pip install streamlit
 ```
 
 ### TODO
-- 
-- Consistentcy with reproducable results : Models tend to behave differently on same conditions.
+- More RL Methods like PPO
+- Option to explore more hyperparameters like GridSearch and RandomSearch
+- Merge with `backtesting.py`
+- Consistency with reproducable results : Models tend to behave differently on same conditions.
 
 
 
