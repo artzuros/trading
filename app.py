@@ -13,9 +13,10 @@ st.title("RL-based Stock Trading Simulator")
 ticker = st.text_input("Enter Stock Ticker", value="AAPL")
 start_date = st.date_input("Start Date", value=pd.to_datetime("2020-01-01"))
 end_date = st.date_input("End Date", value=pd.to_datetime("2023-01-01"))
-model = st.selectbox("Select Model", ["dqn", "ddpg","a2c"])
+model = st.selectbox("Select Model", ["dqn", "ddpg", "a2c"])
 episodes = st.slider("Training Episodes", min_value=10, max_value=1000, value=500)
 epsilon = st.slider("Epsilon (DQN)", min_value=0.01, max_value=1.0, value=0.1) if model == "dqn" else None
+seed = st.number_input("Random Seed", value=42)
 
 discrete_action_space = True if model == "dqn" else False
 
@@ -25,8 +26,6 @@ if st.button("Run Simulation"):
     ohlc_data = fetch_ohlc_data(ticker, str(start_date), str(end_date))
     
     # Save inputs for backend script
-
-# Convert args dictionary to Namespace
     args = Namespace(
         ticker=ticker,
         start_date=str(start_date),
@@ -34,7 +33,8 @@ if st.button("Run Simulation"):
         model=model,
         episodes=episodes,
         epsilon=epsilon,
-        discrete=discrete_action_space
+        discrete=discrete_action_space,
+        seed=seed
     )
 
     train_and_backtest_main(args)
