@@ -58,7 +58,9 @@ pip install streamlit
 - More RL Methods like PPO
 - Option to explore more hyperparameters like GridSearch and RandomSearch
 - Merge with `backtesting.py`
-- Consistency with reproducable results : Models tend to behave differently on same conditions.
+- Calculate backtest steps: Dependent on the training data range
+# DONE
+- ✔️ Consistency with reproducible results: Ensure that models produce consistent results under the same conditions.
 
 
 
