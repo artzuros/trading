@@ -41,7 +41,8 @@ class StateNormalizer:
 
 class DDPGAgent:
     def __init__(self, state_dim, action_dim, action_bounds, gamma=0.99, lr=3e-4, tau=0.005,
-                 min_trade_amount=1000, max_trade_amount=100000):
+                 min_trade_amount=1000, max_trade_amount=100000, seed=42):
+        self.set_seed(seed)
         self.state_dim = state_dim
         self.action_dim = action_dim  
         self.action_bounds = action_bounds
@@ -111,6 +112,21 @@ class DDPGAgent:
         self.min_trade_amount = min_trade_amount
         self.max_trade_amount = max_trade_amount
         self.state_normalizer = StateNormalizer()
+
+    def set_seed(self, seed: int):
+        # Set Python random seed
+        random.seed(seed)
+        
+        # Set numpy random seed
+        np.random.seed(seed)
+        
+        # Set PyTorch random seed
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        
+        # Ensure deterministic behavior on CUDA (if applicable)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
 
     def scale_action_to_trade_amount(self, action):
         """Scale normalized action (-1, 1) to actual trade amount"""

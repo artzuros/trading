@@ -5,7 +5,8 @@ import random
 import numpy as np
 
 class DQNAgent:
-    def __init__(self, state_dim, action_dim, epsilon=0.1, gamma=0.99, lr=1e-3, target_update=10):
+    def __init__(self, state_dim, action_dim, epsilon=0.1, gamma=0.99, lr=1e-3, target_update=10, seed=42):
+        self.set_seed(seed)
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.epsilon = epsilon
@@ -36,6 +37,21 @@ class DQNAgent:
         self.batch_size = 64
         self.max_memory = 10000
         self.steps = 0
+
+    def set_seed(self, seed: int):
+        # Set Python random seed
+        random.seed(seed)
+        
+        # Set numpy random seed
+        np.random.seed(seed)
+        
+        # Set PyTorch random seed
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        
+        # Ensure deterministic behavior on CUDA (if applicable)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
 
     def act(self, state):
         if random.random() < self.epsilon:

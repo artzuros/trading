@@ -3,9 +3,29 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 import numpy as np
+import random
+
+def set_seed(seed: int):
+    # Set Python random seed
+    random.seed(seed)
+    
+    # Set numpy random seed
+    np.random.seed(seed)
+    
+    # Set PyTorch random seed
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)  # If you're using multiple GPUs
+    
+    # Ensure deterministic behavior on CUDA (if applicable)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+# Example of setting the seed to 42
+set_seed(42)
 
 class A2CAgent:
-    def __init__(self, state_dim, action_dim, lr=1e-4, gamma=0.99, continuous=False, entropy_coef=0.01):
+    def __init__(self, state_dim, action_dim, lr=1e-4, gamma=0.99, continuous=False, entropy_coef=0.01, seed=42):
+        self.set_seed(seed)  # Set the seed here
         self.action_dim = action_dim
         self.state_dim = state_dim
         self.gamma = gamma
@@ -30,7 +50,22 @@ class A2CAgent:
         
         # Optimizer
         self.optimizer = optim.Adam(self.parameters(), lr=lr)
-    
+
+    def set_seed(self, seed: int):
+        # Set Python random seed
+        random.seed(seed)
+        
+        # Set numpy random seed
+        np.random.seed(seed)
+        
+        # Set PyTorch random seed
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)  # If you're using multiple GPUs
+        
+        # Ensure deterministic behavior on CUDA (if applicable)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
     def parameters(self):
         if self.continuous:
             return list(self.shared_layers.parameters()) + \
