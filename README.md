@@ -157,6 +157,8 @@ trading/
 ├── a2c.py                     # Implementation of the A2C agent
 ├── env.py                     # Custom trading environment
 ├── requirements.txt           # Required Python packages
+├── results/                   # Contains results performed
+├── media/                     # Contains all relevant media
 └── README.md                  # Project documentation
 
 app.py: A Streamlit interface for easy interaction with the RL models.
